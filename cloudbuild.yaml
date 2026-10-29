@@ -1,0 +1,13 @@
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+steps:
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: gcloud
+    args:
+      - storage
+      - rsync
+      - --recursive
+      - --delete-unmatched-destination-objects
+      - airflow-project/dags
+      - gs://us-central1-zimstat-dev-4545f23a-bucket/dags
