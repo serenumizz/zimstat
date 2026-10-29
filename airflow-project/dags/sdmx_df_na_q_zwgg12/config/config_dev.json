@@ -1,0 +1,41 @@
+{
+    "env": {
+        "source": {
+            "base_url"  : "https://zw.sdmx.afdb.org/ns-ws/rest/data",
+            "dataflow"  : "ZW1,DF_NA_Q_ZWGG12,1.0",
+            "key"       : "all",
+            "params"    : {
+                "detail"               : "full",
+                "dimensionAtObservation": "TIME_PERIOD"
+            },
+            "accept"    : "application/vnd.sdmx.data+csv;version=1.0.0",
+            "required_column": "OBS_VALUE"
+        },
+        "gcs": {
+            "bucket"        : "zimstat_tmp",
+            "folder"        : "raw/sdmx/DF_NA_Q_ZWGG12",
+            "filename"      : "df_na_q_zwgg12",
+            "gcp_conn_id"   : "google_cloud_default"
+        },
+        "bq": {
+            "project_id"    : "zimstat-data-commons",
+            "dataset"       : "dw",
+            "table"         : "df_na_q_zwgg12",
+            "gcp_conn_id"   : "google_cloud_default"
+        }
+    },
+    "job": {
+        "job_name"        : "sdmx_df_na_q_zwgg12_to_gcs",
+        "project_id"      : "zimstat-data-commons",
+        "owner"           : "zimstat",
+        "email"           : ["yusriilza.sania@digitaldividedata.com"],
+        "retries"         : 3,
+        "retry_delay"     : 300,
+        "schedule"        : "@monthly",
+        "start_date"      : "2025-01-01",
+        "timezone"        : "Africa/Harare",
+        "concurrency"     : 1,
+        "max_active_runs" : 1,
+        "tags"            : ["zimstat", "sdmx", "gcs", "bigquery"]
+    }
+}
