@@ -16,6 +16,12 @@
             "folder"        : "raw/sdmx/WDSR_PROV",
             "filename"      : "wdsr_prov",
             "gcp_conn_id"   : "google_cloud_default"
+        },
+        "bq": {
+            "project_id"    : "zimstat-data-commons",
+            "dataset"       : "dw",
+            "table"         : "wdsr_prov",
+            "gcp_conn_id"   : "google_cloud_default"
         }
     },
     "job": {
@@ -30,6 +36,6 @@
         "timezone"        : "Africa/Harare",
         "concurrency"     : 1,
         "max_active_runs" : 1,
-        "tags"            : ["zimstat", "sdmx", "gcs"]
+        "tags"            : ["zimstat", "sdmx", "gcs", "bigquery"]
     }
 }
