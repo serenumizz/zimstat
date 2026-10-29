@@ -14,7 +14,7 @@ from airflow.providers.google.cloud.hooks.gcs import GCSHook
 
 
 # Load default global config
-ENV           = Variable.get("ENVIRONMENT")
+ENV           = Variable.get("ENVIRONMENT", default_var="dev")
 
 script_dir    = os.path.dirname(__file__)
 abs_file_path = os.path.join(script_dir, f"config/config_{ENV}.json")
