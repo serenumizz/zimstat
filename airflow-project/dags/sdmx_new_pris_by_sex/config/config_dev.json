@@ -17,10 +17,12 @@
             "filename"      : "new_pris_by_sex",
             "gcp_conn_id"   : "google_cloud_default"
         },
-        "bq": {
+        "vm": {
             "project_id"    : "zimstat-data-commons",
-            "dataset"       : "dw",
-            "table"         : "new_pris_by_sex",
+            "zone"          : "us-central1-f",
+            "instance_name" : "zimstat-instance",
+            "dest_dir"      : "data/",
+            "pool"          : "vm_copy_pool",
             "gcp_conn_id"   : "google_cloud_default"
         }
     },
@@ -36,6 +38,6 @@
         "timezone"        : "Africa/Harare",
         "concurrency"     : 1,
         "max_active_runs" : 1,
-        "tags"            : ["zimstat", "sdmx", "gcs", "bigquery"]
+        "tags"            : ["zimstat", "sdmx", "gcs", "vm"]
     }
 }

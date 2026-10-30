@@ -110,6 +110,7 @@ with DAG(
     # Copy the CSV extracted in this run from GCS to the VM (runs gcloud on the VM over SSH)
     copy_to_vm = SSHOperator(
         task_id     = "copy_to_vm",
+        pool        = VM["pool"],
         ssh_hook    = ComputeEngineSSHHook(
             instance_name = VM["instance_name"],
             zone          = VM["zone"],
