@@ -11,7 +11,8 @@ from airflow.models import Variable
 from airflow.operators.python import PythonOperator
 from airflow.operators.dummy import DummyOperator
 from airflow.providers.google.cloud.hooks.gcs import GCSHook
-from airflow.providers.google.cloud.transfers.gcs_to_bigquery import GCSToBigQueryOperator
+from airflow.providers.google.cloud.hooks.compute_ssh import ComputeEngineSSHHook
+from airflow.providers.ssh.operators.ssh import SSHOperator
 
 
 # Load default global config
@@ -25,7 +26,7 @@ config_json   = json.load(open(abs_file_path))
 config_env = config_json["env"]
 SOURCE     = config_env["source"]
 GCS        = config_env["gcs"]
-BQ         = config_env["bq"]
+VM         = config_env["vm"]
 
 # Load job config
 JOB        = config_json["job"]
@@ -106,20 +107,24 @@ with DAG(
         }
     )
 
-    # Create the table if it does not exist, then load the file extracted in this run
-    load_to_bq = GCSToBigQueryOperator(
-        task_id                             = "load_to_bq",
-        bucket                              = GCS["bucket"],
-        source_objects                      = [
-            f"{GCS['folder']}/dt={{{{ ts_nodash[:8] }}}}/{GCS['filename']}_{{{{ ts_nodash }}}}.csv"
-        ],
-        destination_project_dataset_table   = f"{BQ['project_id']}.{BQ['dataset']}.{BQ['table']}",
-        source_format                       = "CSV",
-        skip_leading_rows                   = 1,
-        autodetect                          = True,
-        create_disposition                  = "CREATE_IF_NEEDED",
-        write_disposition                   = "WRITE_TRUNCATE",
-        gcp_conn_id                         = BQ["gcp_conn_id"]
+    # Copy the CSV extracted in this run from GCS to the VM (runs gcloud on the VM over SSH)
+    copy_to_vm = SSHOperator(
+        task_id     = "copy_to_vm",
+        ssh_hook    = ComputeEngineSSHHook(
+            instance_name = VM["instance_name"],
+            zone          = VM["zone"],
+            project_id    = VM["project_id"],
+            use_oslogin   = True,
+            use_iap_tunnel= False,
+            gcp_conn_id   = VM["gcp_conn_id"]
+        ),
+        command     = (
+            f"mkdir -p {VM['dest_dir']} && "
+            f"gcloud storage cp "
+            f"gs://{GCS['bucket']}/{GCS['folder']}/dt={{{{ ts_nodash[:8] }}}}/{GCS['filename']}_{{{{ ts_nodash }}}}.csv "
+            f"{VM['dest_dir']}"
+        ),
+        cmd_timeout = 600
     )
 
     job_finish = DummyOperator(
@@ -131,6 +136,6 @@ with DAG(
     (
         job_start
         >> extract_to_gcs
-        >> load_to_bq
+        >> copy_to_vm
         >> job_finish
     )
